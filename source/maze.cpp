@@ -140,58 +140,6 @@ Maze::Maze(int r, int c)
     vertex_buffer_vector.push_back({{this -> r -0.5, -0.5}, {this->r - 0.5, this->c -0.5}});
     vertex_buffer_vector.push_back({{-0.5, this->c-0.5}, {this->r - 0.5,this->c -0.5}});
 
-    bool up, left;
-    // for (int i = 0; i < r; i++)
-    // {
-    //     for (int j = 0; j < c; j++)
-    //     {
-    //         if ((i != 0 && i != this->r - 1) && (j != 0 && j != this->c - 1))
-    //             continue;
-    //         if (i == this->outCoords.first && j == this->outCoords.second)
-    //             continue;
-    //         up = left = false;
-    //         bool ver = false;
-    //         bool hor = false;
-    //         cout << i << "   " << j << endl;
-    //         if (i == 0 || i == r - 1)
-    //             hor = true;
-    //         if (j == 0 || j == c - 1)
-    //             ver = true;
-
-    //         if (i == 0)
-    //             up = true;
-    //         if (j == 0)
-    //             left = true;
-
-    //         if (hor)
-    //         {
-    //             // int i1 = i, i2 = i, j1 = j, j2 = j + 1;
-    //             // if (up)
-    //             //     i1 -= 1, i2 -= 1;
-    //             // if (left)
-    //             //     j1 -= 1, j2 -= 1;
-    //             // vertex_buffer_vector.push_back({{i1 - edgeLength/2.0 , j1- edgeLength/2.0}, {i2 -edgeLength/2.0, j2- edgeLength/2.0}});
-    //             // cout << "{" << i1 << "," << j1 << "   " << i2 << "," << j2 << "}" << endl;
-    //         }
-
-    //         if (ver)
-    //         {
-    //             // int i1 = i, i2 = i + 1, j1 = j, j2 = j;
-    //             // if (!up)
-    //             //     i1 += 1, i2 += 1;
-    //             // if (left)
-    //             //     j1 -= 1, j2 -= 1;
-    //             // vertex_buffer_vector.push_back({{i1 - edgeLength / 2.0, j1 - edgeLength / 2.0}, {i2 - edgeLength / 2.0, j2 - edgeLength / 2.0}});
-    //             // cout << "{" << i1 << "," << j1 << "   " << i2 << "," << j2 << "}" << endl;
-    //         }
-    //     }
-    // }
-
-    // vertex_buffer_vector.push_back({{-1, -1}, {-1, this->c - 1}});
-    // vertex_buffer_vector.push_back({{-1, -1}, {this->r - 1, -1}});
-    // vertex_buffer_vector.push_back({{this->r - 1, -1}, {this->r - 1, this->c - 1}});
-    // vertex_buffer_vector.push_back({{-1, this->c - 1}, {this->r - 1, this->c - 1}});
-
     GLfloat vertex_buffer_data[vertex_buffer_vector.size() * 6];
     cout << "length: " << vertex_buffer_vector.size() << endl;
     int ind = 0;
@@ -208,19 +156,14 @@ Maze::Maze(int r, int c)
         ind += 6;
     }
 
-    cout << "vertex data: " << endl;
-    for (int i = 0; i < vertex_buffer_vector.size() * 6; i++)
-    {
-        cout << vertex_buffer_data[i] << " ";
-        if (i % 3 == 2)
-            cout << endl;
-    }
-    cout << endl;
-
-    // for (auto i : vertex_buffer_vector)
+    // cout << "vertex data: " << endl;
+    // for (int i = 0; i < vertex_buffer_vector.size() * 6; i++)
     // {
-    //     cout << "[ {" << i.first.first << ',' << i.first.second << "},{" << i.second.first << ',' << i.second.second << "} ]" << endl;
+    //     cout << vertex_buffer_data[i] << " ";
+    //     if (i % 3 == 2)
+    //         cout << endl;
     // }
+    // cout << endl;
 
     this->object = create3DObject(GL_LINES, vertex_buffer_vector.size() * 6, vertex_buffer_data, COLOR_BLACK, GL_FILL);
 }

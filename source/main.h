@@ -10,10 +10,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <GLUT/glut.h>
+
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+
 
 struct color_t {
     int r;
