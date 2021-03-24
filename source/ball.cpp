@@ -10,7 +10,7 @@ Ball::Ball(float x, float y, color_t color) {
     static const GLfloat vertex_buffer_data[] = {
         -1.0f,-1.0f,-1.0f, // triangle 1 : begin
         -1.0f,-1.0f, 1.0f,
-        -1.0f, 1.0f, 1.0f, // triangle 1 : end
+        -1.0f, 1.0f, 1.0f, // triangl e 1 : end
         1.0f, 1.0f,-1.0f, // triangle 2 : begin
         -1.0f,-1.0f,-1.0f,
         -1.0f, 1.0f,-1.0f, // triangle 2 : end
@@ -46,7 +46,7 @@ Ball::Ball(float x, float y, color_t color) {
         1.0f,-1.0f, 1.0f
     };
 
-    this->object = create3DObject(GL_TRIANGLES, 12*3, vertex_buffer_data, color, GL_FILL);
+    this->object = create3DObject(GL_LINES, 18 * 2, vertex_buffer_data, color, GL_FILL);
 }
 
 void Ball::draw(glm::mat4 VP) {
