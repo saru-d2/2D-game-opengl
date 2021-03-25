@@ -3,11 +3,12 @@
 #include "ball.h"
 #include "maze.h"
 #include "agent.h"
+#include "hud.h"
 
 using namespace std;
 
 GLMatrices Matrices;
-GLuint programID;
+GLuint programID, textShaderID;
 GLFWwindow *window;
 
 /**************************
@@ -18,6 +19,7 @@ Ball ball1;
 Maze maze;
 Agent crewmate;
 Agent imposter;
+HUD hud;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
@@ -60,10 +62,11 @@ void draw()
     // Don't change unless you are sure!!
     glm::mat4 MVP; // MVP = Projection * View * Model
 
-    // Scene render
-    maze.draw(VP);
-    crewmate.draw(VP);
-    imposter.draw(VP);
+    // // Scene render
+    // maze.draw(VP);
+    // crewmate.draw(VP);
+    // imposter.draw(VP);
+    hud.RenderText(textShaderID, "yoloooo", 50.0f , 50.0f, 2.0f , glm::vec3(0.0f, 0.8f, 0.2f));
     // ball1.draw(VP);
 }
 
@@ -118,12 +121,13 @@ void initGL(GLFWwindow *window, int width, int height)
     ball1 = Ball(0, 0, COLOR_RED);
     crewmate = Agent(0, 0, false);
     // -----maze
-    maze = Maze(6, 6);
+    maze = Maze(9, 9);
     imposter = Agent(maze.r - 1, maze.c - 1, true);
 
     cout << "maze cols: " << maze.c << endl;
     cout << "maze rows: " << maze.r << endl;
 
+    hud = HUD(0.0, 0.0, 0, 0);
     // auto adj = maze.adj;
     // for (int i = 0; i < maze.r; i++)
     //     for (int j = 0; j < maze.c; j++)
@@ -133,6 +137,7 @@ void initGL(GLFWwindow *window, int width, int height)
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("../source/shaders/shader.vert", "../source/shaders/shader.frag");
+    textShaderID = LoadShaders("../source/shaders/textShader.vert", "../source/shaders/textShader.frag");
     // Get a handle for our "MVP" uniform
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
 
@@ -154,8 +159,8 @@ void initGL(GLFWwindow *window, int width, int height)
 int main(int argc, char **argv)
 {
     srand(time(0));
-    int width = 600;
-    int height = 600;
+    int width = 900;
+    int height = 900;
 
     window = initGLFW(width, height);
 

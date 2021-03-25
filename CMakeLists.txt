@@ -50,3 +50,8 @@ target_link_libraries(${PROJECT_NAME} GLEW::GLEW)
 pkg_check_modules(GLM REQUIRED glm)
 include_directories(${GLM_INCLUDE_DIRS})
 target_link_libraries (${PROJECT_NAME} ${GLM_LIBRARIES})
+
+# FreeType
+find_package(Freetype REQUIRED)
+target_link_libraries(${PROJECT_NAME} ${FREETYPE_LIBRARIES})
+include_directories(${FREETYPE_INCLUDE_DIRS})

@@ -8,10 +8,13 @@
 #include <utility>
 #include <queue>
 #include <list>
+#include <string>
+#include <map>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
+// #include <ft2build.h>
+// #include FT_FREETYPE_H
 #include <GLUT/glut.h>
 
 #define GLM_FORCE_RADIANS
