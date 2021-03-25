@@ -6,6 +6,8 @@
 #include <fstream>
 #include <vector>
 #include <utility>
+#include <queue>
+#include <list>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -87,4 +89,9 @@ extern const color_t COLOR_GREEN;
 extern const color_t COLOR_BLACK;
 extern const color_t COLOR_BACKGROUND;
 
+extern bool kbdUP;
+extern bool kbdDOWN;
+extern bool kbdLEFT;
+extern bool kbdRIGHT;
+extern bool kbdSEEK;
 #endif

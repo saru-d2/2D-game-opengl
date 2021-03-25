@@ -17,6 +17,7 @@ GLFWwindow *window;
 Ball ball1;
 Maze maze;
 Agent crewmate;
+Agent imposter;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
@@ -35,7 +36,7 @@ void draw()
     glUseProgram(programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye(maze.r / 2 , maze.c / 2 , 3);
+    glm::vec3 eye(maze.r / 2, maze.c / 2, 3);
 
     // glm::vec3 eye(5 * cos(camera_rotation_angle * M_PI / 180.0f), maze.c / 2, 5 * sin(camera_rotation_angle * M_PI / 180.0f));
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
@@ -62,29 +63,42 @@ void draw()
     // Scene render
     maze.draw(VP);
     crewmate.draw(VP);
+    imposter.draw(VP);
     // ball1.draw(VP);
 }
 
 void tick_input(GLFWwindow *window)
 {
-    int left = glfwGetKey(window, GLFW_KEY_LEFT);
-    int right = glfwGetKey(window, GLFW_KEY_RIGHT);
-    int up = glfwGetKey(window, GLFW_KEY_UP);
-    int down = glfwGetKey(window, GLFW_KEY_DOWN);
-    if (left)
+    // int left = glfwGetKey(window, GLFW_KEY_LEFT);
+    // int right = glfwGetKey(window, GLFW_KEY_RIGHT);
+    // int up = glfwGetKey(window, GLFW_KEY_UP);
+    // int down = glfwGetKey(window, GLFW_KEY_DOWN);
+    int s = glfwGetKey(window, GLFW_KEY_S);
+    if (kbdLEFT)
     {
         // Do something
         crewmate.move(-1, 0, maze.adj, maze.r, maze.c);
+        kbdLEFT = false;
     }
-    if (right)
+    if (kbdRIGHT)
     {
         crewmate.move(1, 0, maze.adj, maze.r, maze.c);
+        kbdRIGHT = false;
     }
-    if (up) {
+    if (kbdUP)
+    {
         crewmate.move(0, 1, maze.adj, maze.r, maze.c);
+        kbdUP = false;
     }
-    if (down) {
+    if (kbdDOWN)
+    {
         crewmate.move(0, -1, maze.adj, maze.r, maze.c);
+        kbdDOWN = false;
+    }
+    if (kbdSEEK)
+    {
+        imposter.seek(crewmate.x, crewmate.y, maze.adj, maze.r, maze.c);
+        kbdSEEK = false;
     }
 }
 
@@ -102,9 +116,10 @@ void initGL(GLFWwindow *window, int width, int height)
     // Create the models
 
     ball1 = Ball(0, 0, COLOR_RED);
-    crewmate = Agent(0, 0, COLOR_GREEN);
+    crewmate = Agent(0, 0, false);
     // -----maze
     maze = Maze(6, 6);
+    imposter = Agent(maze.r - 1, maze.c - 1, true);
 
     cout << "maze cols: " << maze.c << endl;
     cout << "maze rows: " << maze.r << endl;

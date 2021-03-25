@@ -29,6 +29,7 @@ void fun(vector<int> adj[], int &r, int &c, vector<vector<int>> &vis, int x, int
         if (vis[x1][y1])
             continue;
         adj[c * x + y].push_back(c * x1 + y1);
+        adj[c * x1 + y1].push_back(c * x + y);
         // cout << x << "," << y << " " << x1 << "," << y1 << endl;
         fun(adj, r, c, vis, x1, y1);
     }
@@ -62,7 +63,7 @@ bool checkEdge(std::vector<std::vector<int>> &adj, pair<int, int> a, pair<int, i
         if (k == c * i2 + j2)
             return false;
     }
-
+    //redundant but whatever
     for (auto k : adj[i2 * c + j2])
     {
         if (k == c * i1 + j1)
@@ -165,7 +166,7 @@ Maze::Maze(int r, int c)
     // }
     // cout << endl;
 
-    this->object = create3DObject(GL_LINES, vertex_buffer_vector.size() * 6, vertex_buffer_data, COLOR_BLACK, GL_FILL);
+    this->object = create3DObject(GL_LINES, vertex_buffer_vector.size() * 2, vertex_buffer_data, COLOR_BLACK, GL_FILL);
 }
 
 void Maze::draw(glm::mat4 VP)

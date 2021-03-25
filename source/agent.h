@@ -7,7 +7,7 @@ class Agent
 {
 public:
     Agent() {}
-    Agent(float x, float y, color_t color);
+    Agent(float x, float y, bool);
     glm::vec3 position;
     float rotation;
     void draw(glm::mat4 VP);
@@ -15,6 +15,7 @@ public:
     void tick();
     double speed;
     float x, y;
+    void seek(int, int, std::vector<std::vector<int>>, int, int);
     void move(int , int, std::vector<std::vector<int>>, int, int);
 
 private:

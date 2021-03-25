@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Agent::Agent(float x, float y, color_t color)
+Agent::Agent(float x, float y, bool imposter)
 {
 
     int numTriangles = 8;
@@ -60,6 +60,12 @@ Agent::Agent(float x, float y, color_t color)
     GLfloat colorBuffer[numTriangles * 3 * 3];
     GLfloat colors[][3] = {{0.7f, 0.7f, 0.9f},
                            {0.7f, 0.9f, 0.7f}};
+    if (imposter)
+    {
+        colors[1][0] = 0.9f;
+        colors[1][1] = 0.2f;
+        colors[1][2] = 0.2f;
+    }
     int colorMap[] = {1, 1, 1, 1, 1, 1, 0, 0};
 
     for (int i = 0; i < numTriangles; i++)
@@ -104,8 +110,6 @@ void Agent::tick()
 void Agent::move(int toX, int toY, vector<vector<int>> adj, int r, int c)
 {
     //check if edge
-    cout << "hi" << endl;
-
     toX += this->x;
     toY += this->y;
     if (toX < 0 || toX >= r || toY >= c || toY < 0)
@@ -129,4 +133,62 @@ void Agent::move(int toX, int toY, vector<vector<int>> adj, int r, int c)
     }
 
     return;
+}
+
+void Agent::seek(int seekX, int seekY, vector<vector<int>> adj, int r, int c)
+{
+    // here we will dijkstra!!
+    // screw it bfs for now
+    list<int> q;
+    vector<int> dis(c * r, INT32_MAX);
+    vector<int> path;
+    vector<bool> vis(r * c, false);
+    vector<int> pred(c * r, -1);
+
+    dis[this->x * c + this->y] = 0;
+    vis[this->x * c + this->y] = true;
+    q.push_back(this->x * c + this->y);
+
+    while (!q.empty())
+    {
+        int fr = q.front();
+        q.pop_front();
+        bool found = false;
+        for (auto i : adj[fr])
+        {
+            if (!vis[i])
+            {
+                vis[i] = true;
+                dis[i] = dis[fr] + 1;
+                pred[i] = fr;
+                q.push_back(i);
+
+                if (i == seekX * c + seekY)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) break;
+        }
+    }
+
+    int crawl = seekX * c + seekY;
+    path.push_back(crawl);
+
+    while(pred[crawl]!= -1){
+        path.push_back(pred[crawl]);
+        crawl = pred[crawl];
+    }
+
+    // for (auto i: path){
+    //     cout<<i<<" ";
+    // }
+    cout<<endl;
+
+    if (path.size() > 1)
+    {
+        this->x = path[path.size() - 2] / c;
+        this->y = path[path.size() - 2] % c;
+    }
 }

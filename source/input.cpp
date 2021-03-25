@@ -13,18 +13,20 @@
 
 #include "main.h"
 
-bool   cannon_keyboard_input = true;
-bool   drag_pan = false, old_cki;
+bool cannon_keyboard_input = true;
+bool drag_pan = false, old_cki;
 double drag_oldx = -1, drag_oldy = -1;
 
 using namespace std;
 
 /* Executed when a regular key is pressed/released/held-down */
 /* Prefered for Keyboard events */
-void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
+void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
     // Function is called first on GLFW_PRESS.
 
-    if (action == GLFW_RELEASE) {
+    if (action == GLFW_RELEASE)
+    {
         // switch (key) {
         // case GLFW_KEY_C:
         // rectangle_rot_status = !rectangle_rot_status;
@@ -38,10 +40,28 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
         // default:
         // break;
         // }
-    } else if (action == GLFW_PRESS) {
-        switch (key) {
+    }
+    else if (action == GLFW_PRESS)
+    {
+        switch (key)
+        {
         case GLFW_KEY_ESCAPE:
             quit(window);
+            break;
+        case GLFW_KEY_UP:
+            kbdUP = true;
+            break;
+        case GLFW_KEY_DOWN:
+            kbdDOWN = true;
+            break;
+        case GLFW_KEY_LEFT:
+            kbdLEFT = true;
+            break;
+        case GLFW_KEY_RIGHT:
+            kbdRIGHT = true;
+            break;
+        case GLFW_KEY_S:
+            kbdSEEK = true;
             break;
         default:
             break;
@@ -50,8 +70,10 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
 }
 
 /* Executed for character input (like in text boxes) */
-void keyboardChar(GLFWwindow *window, unsigned int key) {
-    switch (key) {
+void keyboardChar(GLFWwindow *window, unsigned int key)
+{
+    switch (key)
+    {
     case 'Q':
     case 'q':
         quit(window);
@@ -62,13 +84,18 @@ void keyboardChar(GLFWwindow *window, unsigned int key) {
 }
 
 /* Executed when a mouse button is pressed/released */
-void mouseButton(GLFWwindow *window, int button, int action, int mods) {
-    switch (button) {
+void mouseButton(GLFWwindow *window, int button, int action, int mods)
+{
+    switch (button)
+    {
     case GLFW_MOUSE_BUTTON_LEFT:
-        if (action == GLFW_PRESS) {
+        if (action == GLFW_PRESS)
+        {
             // Do something
             return;
-        } else if (action == GLFW_RELEASE) {
+        }
+        else if (action == GLFW_RELEASE)
+        {
             // Do something
         }
         break;
@@ -82,6 +109,7 @@ void mouseButton(GLFWwindow *window, int button, int action, int mods) {
     }
 }
 
-void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
     // Do something
 }
