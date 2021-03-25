@@ -66,7 +66,9 @@ void draw()
     // maze.draw(VP);
     // crewmate.draw(VP);
     // imposter.draw(VP);
-    hud.RenderText(textShaderID, "yoloooo", 50.0f , 50.0f, 2.0f , glm::vec3(0.0f, 0.8f, 0.2f));
+    hud.RenderText(textShaderID, "yoloooo", 50.0f , 50.0f, 2.0f , glm::vec3(0.0f, 0.0f, 0.0f));
+    hud.RenderText(textShaderID, "yoloooo", 0.0f , 0.0f, 1.0f , glm::vec3(0.2f, 0.8f, 0.2f));
+    hud.RenderText(textShaderID, "yoloooo", 10.0f , 10.0f, 3.0f , glm::vec3(0.3f, 0.8f, 0.2f));
     // ball1.draw(VP);
 }
 

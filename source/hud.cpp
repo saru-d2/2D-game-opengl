@@ -11,10 +11,9 @@ struct Character
 std::map<char, Character> Characters;
 unsigned int vao, vbo;
 
-HUD::HUD( int width, int height, int x, int y)
+HUD::HUD(int width, int height, int x, int y)
 {
 	//compilinmg shaders
-
 
 	// for text rendering
 
@@ -38,10 +37,11 @@ HUD::HUD( int width, int height, int x, int y)
 		std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
 		return;
 	}
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
 
 	for (unsigned char c = 0; c < 128; c++)
 	{
-		cout << c << endl;
+		// cout << c << endl;
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
 		{
 			fprintf(stderr, "FreeType: Failed to load Glyph\n");
@@ -91,9 +91,9 @@ HUD::HUD( int width, int height, int x, int y)
 
 void HUD::RenderText(GLuint shaderID, std::string text, float x, float y, float scale, glm::vec3 color)
 {
-	cout<<"hi"<<endl;
+	// cout<<"hi"<<endl;
 	glUseProgram(shaderID);
-	glUniform3f(glGetUniformLocation(shaderID, "textColor"), color.x, color.y, color.z);
+	glUniform3f(glGetUniformLocation(shaderID, "textColor"), color[0], color[1], color[2]);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(vao);
 
