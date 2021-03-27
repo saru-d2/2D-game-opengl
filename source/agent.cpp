@@ -5,7 +5,7 @@ using namespace std;
 
 Agent::Agent(float x, float y, bool imposter)
 {
-
+    this -> alive = true;
     int numTriangles = 8;
     // this->position = glm::vec3(x, y, 0);
     this->x = x;
@@ -84,6 +84,7 @@ Agent::Agent(float x, float y, bool imposter)
 
 void Agent::draw(glm::mat4 VP)
 {
+    if (this->alive == false) return;
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate(glm::vec3(this->x, this->y, 0)); // glTranslatef
     glm::mat4 rotate = glm::rotate((float)(this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
@@ -110,6 +111,8 @@ void Agent::tick()
 void Agent::move(int toX, int toY, vector<vector<int>> adj, int r, int c)
 {
     //check if edge
+    if (this->alive == false) return;
+
     toX += this->x;
     toY += this->y;
     if (toX < 0 || toX >= r || toY >= c || toY < 0)
@@ -139,6 +142,8 @@ void Agent::seek(int seekX, int seekY, vector<vector<int>> adj, int r, int c)
 {
     // here we will dijkstra!!
     // screw it bfs for now
+    if (this->alive == false) return;
+
     list<int> q;
     vector<int> dis(c * r, INT32_MAX);
     vector<int> path;
@@ -191,4 +196,10 @@ void Agent::seek(int seekX, int seekY, vector<vector<int>> adj, int r, int c)
         this->x = path[path.size() - 2] / c;
         this->y = path[path.size() - 2] % c;
     }
+}
+
+void Agent::kill() {
+    this->x = -1;
+    this->y = -1;
+    this->alive = false;
 }

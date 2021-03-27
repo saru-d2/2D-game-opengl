@@ -1,5 +1,6 @@
 #include "hud.h"
 using namespace std;
+#include "glm/gtc/type_ptr.hpp"
 
 struct Character
 {
@@ -11,11 +12,17 @@ struct Character
 std::map<char, Character> Characters;
 unsigned int vao, vbo;
 
-HUD::HUD(int width, int height, int x, int y)
+GLuint shaderID;
+
+HUD::HUD(int width, int height, int windowWidth, int windowHeight)
 {
 	//compilinmg shaders
-
 	// for text rendering
+	shaderID = LoadShaders("../source/shaders/textShader.vert", "../source/shaders/textShader.frag");
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(900), 0.0f, static_cast<float>(900));
+	glUseProgram(shaderID);
+	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	glUseProgram(0);
 
 	FT_Library ft;
 	if (FT_Init_FreeType(&ft))
@@ -89,14 +96,28 @@ HUD::HUD(int width, int height, int x, int y)
 	glBindVertexArray(0);
 }
 
+void HUD::draw()
+{
+	glEnable(GL_BLEND);
+	
+	glActiveTexture(GL_TEXTURE0);
+
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquation(GL_FUNC_ADD);
+
+	RenderText(shaderID, "lives: ", 900 - 240.0f, 900 - 80.0f, 0.7f, glm::vec3(0.003, 0.996, 0.615));
+	glUseProgram(0);
+	glBlendFunc(GL_ONE, GL_ZERO);
+}
+
 void HUD::RenderText(GLuint shaderID, std::string text, float x, float y, float scale, glm::vec3 color)
 {
-	// cout<<"hi"<<endl;
 	glUseProgram(shaderID);
 	glUniform3f(glGetUniformLocation(shaderID, "textColor"), color[0], color[1], color[2]);
 	glActiveTexture(GL_TEXTURE0);
 	glBindVertexArray(vao);
 
+	// Iterate through all characters
 	std::string::const_iterator c;
 	for (c = text.begin(); c != text.end(); c++)
 	{
@@ -107,16 +128,16 @@ void HUD::RenderText(GLuint shaderID, std::string text, float x, float y, float 
 
 		float w = ch.Size.x * scale;
 		float h = ch.Size.y * scale;
-		float vertices[][4] = {
+		// update VBO for each character
+		float vertices[6][4] = {
 			{xpos, ypos + h, 0.0f, 0.0f},
 			{xpos, ypos, 0.0f, 1.0f},
 			{xpos + w, ypos, 1.0f, 1.0f},
 
 			{xpos, ypos + h, 0.0f, 0.0f},
 			{xpos + w, ypos, 1.0f, 1.0f},
-			{xpos + w, ypos + h, 1.0f, 0.0f},
-		};
-
+			{xpos + w, ypos + h, 1.0f, 0.0f}};
+		// render glyph texture over quad
 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
 		// update content of VBO memory
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -125,7 +146,7 @@ void HUD::RenderText(GLuint shaderID, std::string text, float x, float y, float 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		// render quad
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-
+		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
 	}
 	glBindVertexArray(0);

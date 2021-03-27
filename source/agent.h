@@ -17,9 +17,11 @@ public:
     float x, y;
     void seek(int, int, std::vector<std::vector<int>>, int, int);
     void move(int , int, std::vector<std::vector<int>>, int, int);
-
+    bool alive;
+    int health;
+    void kill();
 private:
     VAO *object;
 };
 
-#endif // BALL_H
+#endif 

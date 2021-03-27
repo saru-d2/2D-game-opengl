@@ -11,4 +11,5 @@ public:
     HUD(int, int, int, int);
     void RenderText(GLuint shaderID, std::string text, float x, float y, float scale, glm::vec3 color);
     int x, y, height, width;
+    void draw();
 };

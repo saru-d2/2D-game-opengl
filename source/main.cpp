@@ -1,25 +1,32 @@
 #include "main.h"
+#include "mazeBg.h"
 #include "timer.h"
 #include "ball.h"
 #include "maze.h"
 #include "agent.h"
+#include "button.h"
 #include "hud.h"
 
 using namespace std;
 
 GLMatrices Matrices;
-GLuint programID, textShaderID;
+GLuint programID;
 GLFWwindow *window;
 
+void gameLogic();
+void endGame(int);
 /**************************
 * Customizable functions *
 **************************/
-
+bool gameOver = false;
+Button killButton;
+Button powerButton;
 Ball ball1;
 Maze maze;
 Agent crewmate;
 Agent imposter;
 HUD hud;
+MazeBg mazeBg;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
@@ -38,7 +45,7 @@ void draw()
     glUseProgram(programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye(maze.r / 2, maze.c / 2, 3);
+    glm::vec3 eye(maze.r / 2, maze.c / 2, 5);
 
     // glm::vec3 eye(5 * cos(camera_rotation_angle * M_PI / 180.0f), maze.c / 2, 5 * sin(camera_rotation_angle * M_PI / 180.0f));
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
@@ -54,6 +61,7 @@ void draw()
     // Matrices.view = glm::lookAt(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); // Fixed camera for 2D (ortho) in XY plane
 
     // Compute ViewProject matrix as view/camera might not be changed for this frame (basic scenario)
+    // feeding position of the crewmate to the shader
     // Don't change unless you are sure!!
     glm::mat4 VP = Matrices.projection * Matrices.view;
 
@@ -62,15 +70,31 @@ void draw()
     // Don't change unless you are sure!!
     glm::mat4 MVP; // MVP = Projection * View * Model
 
+    // glm::vec3 agentPos = glm::vec3( 
+    //     crewmate.x, crewmate.y, -2
+    // );
+    // glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]); 
+
+
     // // Scene render
-    // maze.draw(VP);
-    // crewmate.draw(VP);
-    // imposter.draw(VP);
-    hud.RenderText(textShaderID, "yoloooo", 50.0f , 50.0f, 2.0f , glm::vec3(0.0f, 0.0f, 0.0f));
-    hud.RenderText(textShaderID, "yoloooo", 0.0f , 0.0f, 1.0f , glm::vec3(0.2f, 0.8f, 0.2f));
-    hud.RenderText(textShaderID, "yoloooo", 10.0f , 10.0f, 3.0f , glm::vec3(0.3f, 0.8f, 0.2f));
-    // ball1.draw(VP);
+    if (!gameOver)
+    {
+        mazeBg.draw(VP);
+        maze.draw(VP);
+        crewmate.draw(VP);
+        imposter.draw(VP);
+        killButton.draw(VP);
+        powerButton.draw(VP);
+        hud.draw();
+        glUseProgram(programID);
+    }
+    else
+    {
+        //render text for game over;
+    }
 }
+
+int imposterCtr = 0;
 
 void tick_input(GLFWwindow *window)
 {
@@ -100,10 +124,12 @@ void tick_input(GLFWwindow *window)
         crewmate.move(0, -1, maze.adj, maze.r, maze.c);
         kbdDOWN = false;
     }
-    if (kbdSEEK)
+    imposterCtr += 1;
+    if (kbdSEEK || imposterCtr == 20)
     {
         imposter.seek(crewmate.x, crewmate.y, maze.adj, maze.r, maze.c);
         kbdSEEK = false;
+        imposterCtr = 0;
     }
 }
 
@@ -119,17 +145,19 @@ void initGL(GLFWwindow *window, int width, int height)
 {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
-
+    killButton = Button(2, 4, 0);
+    powerButton = Button(2, 3, 1);
     ball1 = Ball(0, 0, COLOR_RED);
     crewmate = Agent(0, 0, false);
     // -----maze
     maze = Maze(9, 9);
+    mazeBg = MazeBg(9, 9);
     imposter = Agent(maze.r - 1, maze.c - 1, true);
 
     cout << "maze cols: " << maze.c << endl;
     cout << "maze rows: " << maze.r << endl;
 
-    hud = HUD(0.0, 0.0, 0, 0);
+    hud = HUD(0.0, 0.0, width, height);
     // auto adj = maze.adj;
     // for (int i = 0; i < maze.r; i++)
     //     for (int j = 0; j < maze.c; j++)
@@ -139,14 +167,14 @@ void initGL(GLFWwindow *window, int width, int height)
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("../source/shaders/shader.vert", "../source/shaders/shader.frag");
-    textShaderID = LoadShaders("../source/shaders/textShader.vert", "../source/shaders/textShader.frag");
+
     // Get a handle for our "MVP" uniform
     Matrices.MatrixID = glGetUniformLocation(programID, "MVP");
 
     reshapeWindow(window, width, height);
 
     // Background color of the scene
-    glClearColor(COLOR_BACKGROUND.r / 256.0, COLOR_BACKGROUND.g / 256.0, COLOR_BACKGROUND.b / 256.0, 0.0f); // R, G, B, A
+    glClearColor(COLOR_BLACK.r / 256.0, COLOR_BLACK.g / 256.0, COLOR_BLACK.b / 256.0, 0.0f); // R, G, B, A
     glClearDepth(1.0f);
 
     glEnable(GL_DEPTH_TEST);
@@ -186,6 +214,9 @@ int main(int argc, char **argv)
         {
             // 60 fps
             // OpenGL Draw commands
+
+            gameLogic();
+
             draw();
             // Swap Frame Buffer in double buffering
             glfwSwapBuffers(window);
@@ -213,4 +244,33 @@ void reset_screen()
     float left = screen_center_x - 4 / screen_zoom;
     float right = screen_center_x + 4 / screen_zoom;
     Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
+}
+
+void gameLogic()
+{
+    if (crewmate.x == killButton.x && crewmate.y == killButton.y)
+    {
+        //vaporize
+        imposter.kill();
+        // endGame(1);
+    }
+
+    if (crewmate.x == imposter.x && crewmate.y == imposter.y)
+    {
+        // crewmate.kill();
+        // endGame(0);
+    }
+}
+
+void endGame(int state)
+{
+    // if (state == 0)
+    // {
+    //     glClearColor(COLOR_RED.r / 256.0, COLOR_RED.g / 256.0, COLOR_RED.b / 256.0, 0.0f); // R, G, B, A
+    // }
+    // else
+    // {
+    //     glClearColor(COLOR_BLACK.r / 256.0, COLOR_BLACK.g / 256.0, COLOR_BLACK.b / 256.0, 0.0f); // R, G, B, A
+    // }
+    // gameOver = true;
 }
