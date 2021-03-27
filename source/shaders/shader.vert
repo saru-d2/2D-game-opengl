@@ -3,11 +3,13 @@
 // input data : sent from main program
 layout (location = 0) in vec3 vertexPosition;
 layout (location = 1) in vec3 vertexColor;
-
 uniform mat4 MVP;
+uniform vec3 agentPos; 
 
 // output data : used by fragment shader
 out vec3 fragColor;
+out vec4 vertPos;
+out vec4 agentPosition;
 
 void main ()
 {
@@ -16,7 +18,8 @@ void main ()
     // The color of each vertex will be interpolated
     // to produce the color of each fragment
     fragColor = vertexColor;
-
-    // Output position of the vertex, in clip space : MVP * position
+    vertPos = MVP * v;
+    agentPosition = MVP * vec4(agentPos, 1);
+    // agentPosition = MVP * vec4( agent, , 0.0, 1)
     gl_Position = MVP * v;
 }
