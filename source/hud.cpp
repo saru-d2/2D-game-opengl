@@ -96,7 +96,7 @@ HUD::HUD(int width, int height, int windowWidth, int windowHeight)
 	glBindVertexArray(0);
 }
 
-void HUD::draw()
+void HUD::draw(int lives, float timeInDark, double score, double time, bool islighted)
 {
 	glEnable(GL_BLEND);
 	
@@ -105,7 +105,29 @@ void HUD::draw()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
 
-	RenderText(shaderID, "lives: ", 900 - 240.0f, 900 - 80.0f, 0.7f, glm::vec3(0.003, 0.996, 0.615));
+	std::string str;
+	str = "lives: ";
+	str += to_string(lives);
+	RenderText(shaderID, str, 900 - 240.0f, 900 - 80.0f, 0.7f, glm::vec3(0.003, 0.06, 0.065));
+	
+	str = "time in dark: ";
+	str += to_string( (int)timeInDark);
+	RenderText(shaderID, str, 900 - 400.0f, 900 - 120.0f, 0.7f, glm::vec3(0.003, 0.06, 0.065));
+
+	str = "score: ";
+	str += to_string( (int)score);
+	RenderText(shaderID, str, 900 - 400.0f, 900 - 160.0f, 0.7f, glm::vec3(0.003, 0.06, 0.065));
+	
+	str = "time: ";
+	str += to_string( 600 - (int)time);
+	RenderText(shaderID, str, 10.0f, 800 - 10.0f, 0.7f, glm::vec3(0.003, 0.06, 0.065));
+
+	str = "light: ";
+	if (islighted) str+= "on"; else str += "off";	
+	RenderText(shaderID, str, 10.0f, 800 - 70.0f, 0.7f, glm::vec3(0.003, 0.06, 0.065));
+
+
+
 	glUseProgram(0);
 	glBlendFunc(GL_ONE, GL_ZERO);
 }

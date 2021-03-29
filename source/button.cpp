@@ -6,7 +6,7 @@ Button::Button(int x, int y, int power)
     this->x = x;
     this->y = y;
 
-    int numTriangles = 9;
+    int numTriangles = 100;
     float TwoPi = 2 * M_PI;
     float theta1 = 0;
     float theta2 = 0;

@@ -6,6 +6,8 @@
 #include "agent.h"
 #include "button.h"
 #include "hud.h"
+#include "lightBlocker.h"
+#include "exitEdge.h"
 
 using namespace std;
 
@@ -18,7 +20,12 @@ void endGame(int);
 /**************************
 * Customizable functions *
 **************************/
+int lightheight;
 bool gameOver = false;
+bool isLighted = false;
+float radius;
+int lives = 5;
+double gameTime = 0.0;
 Button killButton;
 Button powerButton;
 Ball ball1;
@@ -27,6 +34,10 @@ Agent crewmate;
 Agent imposter;
 HUD hud;
 MazeBg mazeBg;
+vector<LightBlocker> lightblockers;
+ExitEdge exitEdge;
+double score = 0.0;
+float timeInDark = 0.0;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
@@ -69,23 +80,69 @@ void draw()
     // For each model you render, since the MVP will be different (at least the M part)
     // Don't change unless you are sure!!
     glm::mat4 MVP; // MVP = Projection * View * Model
-
-    // glm::vec3 agentPos = glm::vec3( 
-    //     crewmate.x, crewmate.y, -2
-    // );
-    // glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]); 
-
+    glm::vec3 agentPos;
+    // if (isLighted)
+    //     lightheight = -4;
+    // else
+    lightheight = -1;
 
     // // Scene render
     if (!gameOver)
     {
+        agentPos = glm::vec3(
+            crewmate.x + 0.5, crewmate.y + 0.5, lightheight);
+        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
         mazeBg.draw(VP);
         maze.draw(VP);
-        crewmate.draw(VP);
-        imposter.draw(VP);
+
+        agentPos = glm::vec3(
+            crewmate.x - killButton.x, crewmate.y - killButton.y, lightheight);
+        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
+
         killButton.draw(VP);
+
+        agentPos = glm::vec3(
+            crewmate.x - powerButton.x, crewmate.y - powerButton.y, lightheight);
+        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
+
         powerButton.draw(VP);
-        hud.draw();
+
+        agentPos = glm::vec3(
+            0, 0, -1);
+        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
+
+        crewmate.draw(VP);
+
+        agentPos = glm::vec3(
+            crewmate.x - imposter.x, crewmate.y - imposter.y, lightheight);
+        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
+
+        imposter.draw(VP);
+
+        lightblockers.clear();
+        vector<pair<int, int>> blocks = maze.getBlocks(crewmate.x, crewmate.y);
+
+        if (!isLighted)
+        {
+            for (auto block : blocks)
+            {
+                lightblockers.push_back(LightBlocker(block.first, block.second));
+            }
+
+            for (auto blocker : lightblockers)
+            {
+                blocker.draw(VP);
+            }
+        }
+        // lives, score, time
+
+        agentPos = glm::vec3(
+            crewmate.x - exitEdge.x, crewmate.y - exitEdge.y, lightheight);
+        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
+
+        exitEdge.draw(VP);
+
+        hud.draw(lives, timeInDark, score, gameTime, isLighted);
         glUseProgram(programID);
     }
     else
@@ -130,6 +187,22 @@ void tick_input(GLFWwindow *window)
         imposter.seek(crewmate.x, crewmate.y, maze.adj, maze.r, maze.c);
         kbdSEEK = false;
         imposterCtr = 0;
+        if (imposter.x == crewmate.x && imposter.y == crewmate.y)
+            lives -= 1;
+    }
+    if (kbdL)
+    {
+        isLighted = !isLighted;
+        if (isLighted)
+        {
+            glUniform1f(glGetUniformLocation(programID, "lighted"), 1.0);
+        }
+        else
+        {
+            glUniform1f(glGetUniformLocation(programID, "lighted"), 0.0);
+        }
+        cout << "islighted" << isLighted << endl;
+        kbdL = false;
     }
 }
 
@@ -153,7 +226,7 @@ void initGL(GLFWwindow *window, int width, int height)
     maze = Maze(9, 9);
     mazeBg = MazeBg(9, 9);
     imposter = Agent(maze.r - 1, maze.c - 1, true);
-
+    exitEdge = ExitEdge(maze.outCoords, maze.r, maze.c);
     cout << "maze cols: " << maze.c << endl;
     cout << "maze rows: " << maze.r << endl;
 
@@ -174,7 +247,7 @@ void initGL(GLFWwindow *window, int width, int height)
     reshapeWindow(window, width, height);
 
     // Background color of the scene
-    glClearColor(COLOR_BLACK.r / 256.0, COLOR_BLACK.g / 256.0, COLOR_BLACK.b / 256.0, 0.0f); // R, G, B, A
+    glClearColor(COLOR_BACKGROUND.r / 256.0, COLOR_BACKGROUND.g / 256.0, COLOR_BACKGROUND.b / 256.0, 0.0f); // R, G, B, A
     glClearDepth(1.0f);
 
     glEnable(GL_DEPTH_TEST);
@@ -248,10 +321,11 @@ void reset_screen()
 
 void gameLogic()
 {
-    if (crewmate.x == killButton.x && crewmate.y == killButton.y)
+    if (crewmate.x == killButton.x && crewmate.y == killButton.y && imposter.alive)
     {
         //vaporize
         imposter.kill();
+        score += 40.0;
         // endGame(1);
     }
 
@@ -259,7 +333,11 @@ void gameLogic()
     {
         // crewmate.kill();
         // endGame(0);
+        // lives -= 1;
     }
+    if (!isLighted)
+        timeInDark += 1.0 / 60.0;
+    gameTime += 1.0 / 60.0;
 }
 
 void endGame(int state)

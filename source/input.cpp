@@ -46,6 +46,7 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods)
         switch (key)
         {
         case GLFW_KEY_ESCAPE:
+            exit(0);
             quit(window);
             break;
         case GLFW_KEY_UP:
@@ -63,6 +64,9 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods)
         case GLFW_KEY_S:
             kbdSEEK = true;
             break;
+        case GLFW_KEY_L:
+            kbdL = true;
+            break;
         default:
             break;
         }
@@ -76,6 +80,7 @@ void keyboardChar(GLFWwindow *window, unsigned int key)
     {
     case 'Q':
     case 'q':
+        exit(0);
         quit(window);
         break;
     default:

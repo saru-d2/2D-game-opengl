@@ -4,22 +4,22 @@
 layout (location = 0) in vec3 vertexPosition;
 layout (location = 1) in vec3 vertexColor;
 uniform mat4 MVP;
-uniform vec3 agentPos; 
 
 // output data : used by fragment shader
 out vec3 fragColor;
 out vec4 vertPos;
+// uniform vec3 agentPos; 
 out vec4 agentPosition;
+out vec3 normal;
 
 void main ()
 {
     vec4 v = vec4(vertexPosition, 1); // Transform an homogeneous 4D vector
 
-    // The color of each vertex will be interpolated
-    // to produce the color of each fragment
+    normal = vec3(0, 0, -1.0);
+    vertPos = vec4(vertexPosition, 1.0);
+
     fragColor = vertexColor;
-    vertPos = MVP * v;
-    agentPosition = MVP * vec4(agentPos, 1);
-    // agentPosition = MVP * vec4( agent, , 0.0, 1)
-    gl_Position = MVP * v;
+
+    gl_Position  = MVP * v;
 }

@@ -1,5 +1,6 @@
 #include "main.h"
 #include "maze.h"
+#include <set>
 
 using namespace std;
 
@@ -19,7 +20,7 @@ void fun(vector<int> adj[], int &r, int &c, vector<vector<int>> &vis, int x, int
     // {
     //     cout << i << " ";
     // }
-    cout << endl;
+    // cout << endl;
     for (auto i : order)
     {
         int x1 = choices[i].first;
@@ -57,7 +58,7 @@ bool checkEdge(std::vector<std::vector<int>> &adj, pair<int, int> a, pair<int, i
         j1 < 0 || j1 >= c)
         return false;
 
-    cout << "{ {" << i1 * c + j1 << "},{" << i2 * c + j2 << "} }" << endl;
+    // cout << "{ {" << i1 * c + j1 << "},{" << i2 * c + j2 << "} }" << endl;
     for (auto k : adj[i1 * c + j1])
     {
         if (k == c * i2 + j2)
@@ -74,7 +75,7 @@ bool checkEdge(std::vector<std::vector<int>> &adj, pair<int, int> a, pair<int, i
         return false;
     map[i1 * c + j1][i2 * c + j2] = true;
     map[i2 * c + j2][i1 * c + j1] = true;
-    cout << '\t' << "[ {" << i1 * c + j1 << "},{" << i2 * c + j2 << "} ]" << endl;
+    // cout << '\t' << "[ {" << i1 * c + j1 << "},{" << i2 * c + j2 << "} ]" << endl;
     return true;
 }
 
@@ -104,9 +105,11 @@ Maze::Maze(int r, int c)
     // this->adj = adj;
     this->adj = vector<vector<int>>(adj, adj + r * c);
     int outR = 0, outC = 0;
+    // if (rand() & 1)
+    //     outC = this->c;
+    outR = (rand() % (this->r - 2)) + 1;
     if (rand() & 1)
-        outC = this->c;
-    outR = rand() % this->r;
+        swap(outR, outC);
     this->outCoords = {outR, outC};
 
     //plotting maze vertices
@@ -137,12 +140,12 @@ Maze::Maze(int r, int c)
         }
 
     vertex_buffer_vector.push_back({{-0.5, -0.5}, {this->r - 0.5, -0.5}});
-    vertex_buffer_vector.push_back({{-0.5, -0.5}, {- 0.5, this->c - 0.5}});
-    vertex_buffer_vector.push_back({{this -> r -0.5, -0.5}, {this->r - 0.5, this->c -0.5}});
-    vertex_buffer_vector.push_back({{-0.5, this->c-0.5}, {this->r - 0.5,this->c -0.5}});
+    vertex_buffer_vector.push_back({{-0.5, -0.5}, {-0.5, this->c - 0.5}});
+    vertex_buffer_vector.push_back({{this->r - 0.5, -0.5}, {this->r - 0.5, this->c - 0.5}});
+    vertex_buffer_vector.push_back({{-0.5, this->c - 0.5}, {this->r - 0.5, this->c - 0.5}});
 
     GLfloat vertex_buffer_data[vertex_buffer_vector.size() * 6];
-    cout << "length: " << vertex_buffer_vector.size() << endl;
+    // cout << "length: " << vertex_buffer_vector.size() << endl;
     int ind = 0;
     for (auto iter : vertex_buffer_vector)
     {
@@ -153,7 +156,7 @@ Maze::Maze(int r, int c)
         vertex_buffer_data[ind + 4] = iter.second.second;
         vertex_buffer_data[ind + 5] = 0.0f;
 
-        cout << vertex_buffer_data[ind] << " " << vertex_buffer_data[ind + 1] << " " << vertex_buffer_data[ind + 2] << " " << vertex_buffer_data[ind + 3] << " " << vertex_buffer_data[ind + 4] << " " << vertex_buffer_data[ind + 5] << endl;
+        // cout << vertex_buffer_data[ind] << " " << vertex_buffer_data[ind + 1] << " " << vertex_buffer_data[ind + 2] << " " << vertex_buffer_data[ind + 3] << " " << vertex_buffer_data[ind + 4] << " " << vertex_buffer_data[ind + 5] << endl;
         ind += 6;
     }
 
@@ -180,4 +183,44 @@ void Maze::draw(glm::mat4 VP)
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->object);
+}
+
+vector<pair<int, int>> Maze::getBlocks(int x, int y)
+{
+    int depth = 2;
+    vector<pair<int, int>> ret;
+
+    queue<pair<int, int>> q;
+    q.push({x * this->c + y, 0});
+    set<int> s;
+    vector<bool> vis(this->r * this->c, 0);
+
+    while (!q.empty())
+    {
+        auto fr = q.front();
+        vis[fr.first] = true;
+        // cout<<  <<endl;
+        q.pop();
+        if (fr.second > depth)
+            break;
+        for (auto i : this->adj[fr.first])
+        {
+            if (!vis[i])
+                q.push({i, fr.second + 1});
+        }
+        // ret.push_back({fr.first / this->c, fr.first % this->c});
+        s.insert(fr.first);
+    }
+
+    for (int i = 0; i < this->r * this->c; i++)
+    {
+        if (s.count(i) == 0)
+        {
+            int tx = i / this->c, ty = i % this->c;
+            if (abs(tx - x) < 3 && abs(ty - y) < 3)
+                ret.push_back({tx, ty});
+        }
+    }
+
+    return ret;
 }

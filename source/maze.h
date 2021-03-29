@@ -16,6 +16,7 @@ public:
     VAO *object;
     glm::vec3 position;
     float rotation;
+    std::vector<std::pair<int, int>> getBlocks(int, int);
 };
 
 #endif

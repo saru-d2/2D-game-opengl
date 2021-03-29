@@ -26,10 +26,10 @@ Agent::Agent(float x, float y, bool imposter)
         {0.0f, -0.3f, 0.0f},   //7
         {0.3f, -0.5f, 0.0f},   //8
         {-0.3f, -0.5f, 0.0f},  //9
-        {-0.1f, 0.2f, 0.01f},  //10
-        {0.35f, 0.2f, 0.01f},  //11
-        {-0.1f, -0.0f, 0.01f}, //12
-        {0.35f, -0.0f, 0.01f}, //13
+        {-0.1f, 0.2f, 0.0f},  //10
+        {0.35f, 0.2f, 0.0f},  //11
+        {-0.1f, -0.0f, 0.0f}, //12
+        {0.35f, -0.0f, 0.0f}, //13
     };
 
     int triangleList[][3] = {
@@ -90,6 +90,7 @@ void Agent::draw(glm::mat4 VP)
     glm::mat4 rotate = glm::rotate((float)(this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
+    
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
@@ -189,7 +190,7 @@ void Agent::seek(int seekX, int seekY, vector<vector<int>> adj, int r, int c)
     // for (auto i: path){
     //     cout<<i<<" ";
     // }
-    cout<<endl;
+    // cout<<endl;
 
     if (path.size() > 1)
     {
