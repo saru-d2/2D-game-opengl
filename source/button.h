@@ -17,6 +17,7 @@ public:
     void tick();
     double speed;
     VAO *object;
+    bool alive;
 };
 
 #endif

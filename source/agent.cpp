@@ -58,8 +58,8 @@ Agent::Agent(float x, float y, bool imposter)
     }
 
     GLfloat colorBuffer[numTriangles * 3 * 3];
-    GLfloat colors[][3] = {{0.7f, 0.7f, 0.9f},
-                           {0.7f, 0.9f, 0.7f}};
+    GLfloat colors[][3] = {{0.5f, 0.7f, 0.9f},
+                           {0.3f, 0.6f, 0.5f}};
     if (imposter)
     {
         colors[1][0] = 0.9f;

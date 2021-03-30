@@ -7,6 +7,7 @@
 #include "button.h"
 #include "hud.h"
 #include "lightBlocker.h"
+#include "powerup.h"
 #include "exitEdge.h"
 
 using namespace std;
@@ -36,11 +37,13 @@ HUD hud;
 MazeBg mazeBg;
 vector<LightBlocker> lightblockers;
 ExitEdge exitEdge;
+vector<Powerup> powerups;
 double score = 0.0;
 float timeInDark = 0.0;
-
+int tasksDone = 0;
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
+bool endState;
 
 Timer t60(1.0 / 60);
 
@@ -104,8 +107,15 @@ void draw()
         agentPos = glm::vec3(
             crewmate.x - powerButton.x, crewmate.y - powerButton.y, lightheight);
         glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
-
         powerButton.draw(VP);
+
+        for (auto powerup : powerups)
+        {
+            agentPos = glm::vec3(
+                crewmate.x - powerup.x, crewmate.y - powerup.y, lightheight);
+            glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
+            powerup.draw(VP);
+        }
 
         agentPos = glm::vec3(
             0, 0, -1);
@@ -142,12 +152,13 @@ void draw()
 
         exitEdge.draw(VP);
 
-        hud.draw(lives, timeInDark, score, gameTime, isLighted);
+        hud.draw(lives, timeInDark, score, gameTime, isLighted, tasksDone);
         glUseProgram(programID);
     }
     else
     {
         //render text for game over;
+        hud.gameOver(endState, score, timeInDark);
     }
 }
 
@@ -324,7 +335,9 @@ void gameLogic()
     if (crewmate.x == killButton.x && crewmate.y == killButton.y && imposter.alive)
     {
         //vaporize
+        tasksDone += 1;
         imposter.kill();
+        killButton.alive = false;
         score += 40.0;
         // endGame(1);
     }
@@ -335,20 +348,56 @@ void gameLogic()
         // endGame(0);
         // lives -= 1;
     }
-    if (!isLighted)
+    if (!isLighted && !gameOver)
         timeInDark += 1.0 / 60.0;
     gameTime += 1.0 / 60.0;
-}
+    if (crewmate.x == powerButton.x && crewmate.y == powerButton.y)
+    {
+        if (powerButton.alive)
+        {
+            tasksDone += 1;
+            powerButton.alive = false;
+            powerups.push_back(Powerup(rand() % 9, rand() % 9));
+            powerups.push_back(Powerup(rand() % 9, rand() % 9));
+            powerups.push_back(Powerup(rand() % 9, rand() % 9));
+            powerups.push_back(Powerup(rand() % 9, rand() % 9));
+        }
+    }
 
-void endGame(int state)
-{
-    // if (state == 0)
+    // for (auto i : powerups)
     // {
-    //     glClearColor(COLOR_RED.r / 256.0, COLOR_RED.g / 256.0, COLOR_RED.b / 256.0, 0.0f); // R, G, B, A
+    //     if (crewmate.x == i.x && crewmate.y == i.y)
+    //     {
+    //         if (i.alive == true)
+    //         {
+    //             score += i.mod;
+    //             i.alive = false;
+    //             i.kill();
+    //         }
+    //     }
     // }
-    // else
-    // {
-    //     glClearColor(COLOR_BLACK.r / 256.0, COLOR_BLACK.g / 256.0, COLOR_BLACK.b / 256.0, 0.0f); // R, G, B, A
-    // }
-    // gameOver = true;
+
+    for (int i = 0; i < powerups.size(); i++)
+    {
+        if (crewmate.x == powerups[i].x && crewmate.y == powerups[i].y)
+        {
+            if (powerups[i].alive == true)
+            {
+                score += powerups[i].mod;
+                powerups[i].kill();
+            }
+        }
+    }
+
+    if (lives == 0 || gameTime > 600)
+    {
+        endState = false;
+        gameOver = true;
+    }
+
+    if (crewmate.x == maze.outCoords.first && crewmate.y == maze.outCoords.second && tasksDone == 2)
+    {
+        endState = true;
+        gameOver = true;
+    }
 }

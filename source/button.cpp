@@ -5,6 +5,7 @@ Button::Button(int x, int y, int power)
     this->power = power;
     this->x = x;
     this->y = y;
+    this->alive = true;
 
     int numTriangles = 100;
     float TwoPi = 2 * M_PI;
@@ -41,6 +42,7 @@ Button::Button(int x, int y, int power)
 
 void Button::draw(glm::mat4 VP)
 {
+    if (!this->alive)return;
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate(glm::vec3(this->x, this->y, 0)); // glTranslatef
     glm::mat4 rotate = glm::rotate((float)(this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
