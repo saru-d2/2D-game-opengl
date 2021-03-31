@@ -5,8 +5,8 @@ using namespace std;
 
 Agent::Agent(float x, float y, bool imposter)
 {
-    this -> alive = true;
-    int numTriangles = 8;
+    this->alive = true;
+    int numTriangles = 7;
     // this->position = glm::vec3(x, y, 0);
     this->x = x;
     this->y = y;
@@ -16,16 +16,16 @@ Agent::Agent(float x, float y, bool imposter)
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
 
     GLfloat vertices[][3] = {
-        {0.0f, 0.5f, 0.0f},    //0
-        {-0.3f, 0.4f, 0.0f},   //1
-        {0.3f, 0.4f, 0.0f},    //2
-        {-0.3f, 0.3f, 0.0f},   //3
-        {-0.4f, 0.3f, 0.0f},   //4
-        {-0.3f, -0.3f, 0.0f},  //5
-        {0.3f, -0.3f, 0.0f},   //6
-        {0.0f, -0.3f, 0.0f},   //7
-        {0.3f, -0.5f, 0.0f},   //8
-        {-0.3f, -0.5f, 0.0f},  //9
+        {0.0f, 0.5f, 0.0f},   //0
+        {-0.3f, 0.2f, 0.0f},  //1
+        {0.3f, 0.2f, 0.0f},   //2
+        {-0.3f, 0.3f, 0.0f},  //3
+        {-0.4f, 0.3f, 0.0f},  //4
+        {-0.3f, -0.3f, 0.0f}, //5
+        {0.3f, -0.3f, 0.0f},  //6
+        {0.0f, -0.3f, 0.0f},  //7
+        {0.3f, -0.5f, 0.0f},  //8
+        {-0.3f, -0.5f, 0.0f}, //9
         {-0.1f, 0.2f, 0.0f},  //10
         {0.35f, 0.2f, 0.0f},  //11
         {-0.1f, -0.0f, 0.0f}, //12
@@ -33,7 +33,7 @@ Agent::Agent(float x, float y, bool imposter)
     };
 
     int triangleList[][3] = {
-        {0, 1, 2},
+        // {0, 1, 2},
         {1, 2, 5},
         {2, 5, 6},
         {3, 4, 5},
@@ -42,8 +42,8 @@ Agent::Agent(float x, float y, bool imposter)
         {10, 11, 12},
         {12, 13, 11},
     };
-
-    GLfloat vertex_buffer_data[9 * numTriangles];
+    int numCircSegments = 8;
+    GLfloat vertex_buffer_data[9 * numTriangles + 9 * numCircSegments];
 
     for (int i = 0; i < numTriangles; i++)
     {
@@ -56,8 +56,22 @@ Agent::Agent(float x, float y, bool imposter)
             }
         }
     }
+    float th1 = 0;
+    float th2;
+    float c1 = 0, c2 = 0.2;
+    float radius = 0.3;
+    for (int i = 0; i < numCircSegments; i++)
+    {
+        th2 = th1;
+        th1 += (M_PI) / numCircSegments;
+        float pts[][3] = {
+            {radius * cos(th1), c2 + radius * sin(th1), 0.0},
+            {radius * cos(th2), c2 + radius * sin(th2), 0.0},
+            {0.0, c2, 0.0},
+        }; for (int j = 0; j < 3; j++) for (int k = 0; k < 3; k++) vertex_buffer_data[9 * numTriangles + 9 * i + 3 * j + k] = pts[j][k];
+    }
 
-    GLfloat colorBuffer[numTriangles * 3 * 3];
+    GLfloat colorBuffer[(numTriangles + numCircSegments) * 9];
     GLfloat colors[][3] = {{0.5f, 0.7f, 0.9f},
                            {0.3f, 0.6f, 0.5f}};
     if (imposter)
@@ -66,9 +80,9 @@ Agent::Agent(float x, float y, bool imposter)
         colors[1][1] = 0.2f;
         colors[1][2] = 0.2f;
     }
-    int colorMap[] = {1, 1, 1, 1, 1, 1, 0, 0};
+    int colorMap[7 + 8] = {1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    for (int i = 0; i < numTriangles; i++)
+    for (int i = 0; i < numTriangles + numCircSegments; i++)
     {
         for (int j = 0; j < 3; j++)
         {
@@ -79,18 +93,19 @@ Agent::Agent(float x, float y, bool imposter)
         }
     }
 
-    this->object = create3DObject(GL_TRIANGLES, numTriangles * 3, vertex_buffer_data, colorBuffer, GL_FILL);
+    this->object = create3DObject(GL_TRIANGLES, numTriangles * 3 + numCircSegments * 3, vertex_buffer_data, colorBuffer, GL_FILL);
 }
 
 void Agent::draw(glm::mat4 VP)
 {
-    if (this->alive == false) return;
+    if (this->alive == false)
+        return;
     Matrices.model = glm::mat4(1.0f);
     glm::mat4 translate = glm::translate(glm::vec3(this->x, this->y, 0)); // glTranslatef
     glm::mat4 rotate = glm::rotate((float)(this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
-    
+
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
@@ -112,7 +127,8 @@ void Agent::tick()
 void Agent::move(int toX, int toY, vector<vector<int>> adj, int r, int c)
 {
     //check if edge
-    if (this->alive == false) return;
+    if (this->alive == false)
+        return;
 
     toX += this->x;
     toY += this->y;
@@ -143,7 +159,8 @@ void Agent::seek(int seekX, int seekY, vector<vector<int>> adj, int r, int c)
 {
     // here we will dijkstra!!
     // screw it bfs for now
-    if (this->alive == false) return;
+    if (this->alive == false)
+        return;
 
     list<int> q;
     vector<int> dis(c * r, INT32_MAX);
@@ -175,14 +192,16 @@ void Agent::seek(int seekX, int seekY, vector<vector<int>> adj, int r, int c)
                     break;
                 }
             }
-            if (found) break;
+            if (found)
+                break;
         }
     }
 
     int crawl = seekX * c + seekY;
     path.push_back(crawl);
 
-    while(pred[crawl]!= -1){
+    while (pred[crawl] != -1)
+    {
         path.push_back(pred[crawl]);
         crawl = pred[crawl];
     }
@@ -199,7 +218,8 @@ void Agent::seek(int seekX, int seekY, vector<vector<int>> adj, int r, int c)
     }
 }
 
-void Agent::kill() {
+void Agent::kill()
+{
     this->x = -1;
     this->y = -1;
     this->alive = false;

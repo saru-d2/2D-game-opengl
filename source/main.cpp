@@ -101,7 +101,6 @@ void draw()
         agentPos = glm::vec3(
             crewmate.x - killButton.x, crewmate.y - killButton.y, lightheight);
         glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
-
         killButton.draw(VP);
 
         agentPos = glm::vec3(
@@ -132,6 +131,14 @@ void draw()
         lightblockers.clear();
         vector<pair<int, int>> blocks = maze.getBlocks(crewmate.x, crewmate.y);
 
+        // lives, score, time
+
+        agentPos = glm::vec3(
+            crewmate.x - exitEdge.x, crewmate.y - exitEdge.y, lightheight);
+        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
+
+        exitEdge.draw(VP);
+
         if (!isLighted)
         {
             for (auto block : blocks)
@@ -144,15 +151,9 @@ void draw()
                 blocker.draw(VP);
             }
         }
-        // lives, score, time
-
-        agentPos = glm::vec3(
-            crewmate.x - exitEdge.x, crewmate.y - exitEdge.y, lightheight);
-        glUniform3fv(glGetUniformLocation(programID, "agentPos"), 1, &agentPos[0]);
-
-        exitEdge.draw(VP);
 
         hud.draw(lives, timeInDark, score, gameTime, isLighted, tasksDone);
+
         glUseProgram(programID);
     }
     else
@@ -225,19 +226,22 @@ void tick_elements()
 
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
+int randInt(){
+    return rand() % maze.r;
+}
 void initGL(GLFWwindow *window, int width, int height)
 {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
-    killButton = Button(2, 4, 0);
-    powerButton = Button(2, 3, 1);
-    ball1 = Ball(0, 0, COLOR_RED);
-    crewmate = Agent(0, 0, false);
-    // -----maze
     maze = Maze(9, 9);
     mazeBg = MazeBg(9, 9);
-    imposter = Agent(maze.r - 1, maze.c - 1, true);
+
+    killButton = Button(randInt(), randInt(), 0);
+    powerButton = Button(randInt(), randInt(), 1);
+    crewmate = Agent(randInt(), randInt(), false);
+    imposter = Agent(randInt(), randInt(), true);
     exitEdge = ExitEdge(maze.outCoords, maze.r, maze.c);
+
     cout << "maze cols: " << maze.c << endl;
     cout << "maze rows: " << maze.r << endl;
 
