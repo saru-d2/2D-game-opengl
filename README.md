@@ -1,4 +1,4 @@
-# CG-ASS-1
+# 2D game - openGL
 
 ## controls -
 
